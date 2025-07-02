@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Online Shopping Journey</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    body { background: #f4f6f8; font-family: 'Segoe UI', Arial, sans-serif; }
+    .container { max-width: 1100px; margin: 40px auto; background: #fff; border-radius: 18px; box-shadow: 0 6px 32px #0001; padding: 32px; }
+    h1 { text-align: center; color: #1a237e; margin-bottom: 40px; }
+    h2 { color: #1976d2; margin-top: 48px; }
+    .summary { background: #e3f2fd; border-left: 6px solid #1976d2; padding: 18px 24px; margin-bottom: 40px; border-radius: 8px; font-size: 1.12em; }
+    .chart-block { margin-bottom: 60px; }
+    .bar-canvas { max-width: 700px; max-height: 350px; display: block; margin: 0 auto 24px auto; }
+    canvas { background: #fafbfc; border-radius: 12px; }
+    @media (max-width: 900px) {
+      .container { padding: 8px; }
+      .bar-canvas { max-width: 100% !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Online Shopping Journey</h1>
+  <div id="charts"></div>
+</div>
+<script>
+Chart.register(window.ChartDataLabels);
+
+const chartData = [
+  // --- Chart 1 ---
+  {
+    title: "Which of the following banking/finance products do you currently have?",
+    labels: ["Credit card", "Debit card", "Digital/mobile Wallet", "Cash on delivery (COD)", "Bank transfers (NEFT/RTGS)", "Fixed Deposit (20k+)", "Cheque/demand draft"],
+    total: [78, 69, 56, 59, 29, 29, 21],
+    metro: [86, 73, 63, 52, 35, 33, 20],
+    nonmetro: [67, 62, 44, 69, 19, 22, 23],
+    age18_24: [61, 67, 61, 65, 28, 21, 19],
+    age25_34: [80, 68, 59, 58, 36, 28, 25],
+    age36plus: [85, 74, 52, 58, 32, 24, 17],
+    male: [83, 70, 59, 58, 33, 31, 24],
+    female: [66, 64, 46, 60, 18, 22, 13],
+    colors: ['#1976d2', '#43a047', '#fbc02d', '#e53935', '#8e24aa', '#039be5', '#6d4c41']
+  },
+  // --- Chart 2 ---
+  {
+    title: "Which one do you use most often [ONLINE OR IN-STORE]?",
+    labels: ["Credit card", "Cash on delivery (COD)", "Debit card"],
+    total: [49, 19, 18],
+    metro: [56, 10, 21],
+    nonmetro: [38, 35, 13],
+    age18_24: [39, 18, 24],
+    age25_34: [75, 0, 22],
+    age36plus: [41, 13, 23],
+    male: [51, 17, 20],
+    female: [43, 25, 16],
+    colors: ['#1976d2', '#e53935', '#43a047']
+  },
+  // --- Chart 3 ---
+  {
+    title: "Ever Purchased from E-commerce Websites",
+    labels: ["Amazon.in", "Flipkart.com", "Snapdeal.com", "Myntra.com", "Shopclues.com", "bigbasket.com", "Jabong.com", "Homeshop18.com"],
+    total: [83, 65, 42, 33, 27, 24, 23, 22],
+    metro: [89, 72, 49, 37, 34, 31, 29, 28],
+    nonmetro: [76, 54, 33, 26, 16, 13, 14, 14],
+    age18_24: [84, 84, 53, 59, 43, 50, 36, 35],
+    age25_34: [93, 89, 74, 43, 47, 37, 35, 35],
+    age36plus: [88, 67, 54, 37, 38, 30, 29, 29],
+    male: [83, 65, 40, 32, 26, 24, 22, 21],
+    female: [85, 64, 46, 35, 29, 25, 25, 24],
+    colors: ['#1976d2', '#43a047', '#fbc02d', '#e53935', '#8e24aa', '#039be5', '#6d4c41', '#ff7043']
+  },
+  // --- Chart 4 ---
+  {
+    title: "Awareness of International Shopping Sites",
+    labels: ["Amazon.com", "eBay.com", "Ali Express", "The Body Shop", "DHGate.com", "Etsy", "JC Penny", "Macy’s", "NewEgg", "Sears"],
+    total: [84, 66, 55, 54, 48, 48, 48, 48, 48, 48],
+    metro: [86, 77, 64, 66, 60, 60, 60, 59, 60, 60],
+    nonmetro: [80, 49, 42, 36, 29, 31, 29, 32, 30, 30],
+    age18_24: [90, 84, 59, 67, 50, 49, 53, 50, 52, 49],
+    age25_34: [98, 92, 90, 91, 91, 91, 90, 90, 91, 91],
+    age36plus: [97, 90, 76, 77, 73, 72, 72, 69, 71, 70],
+    male: [85, 67, 56, 53, 48, 48, 47, 49, 48, 48],
+    female: [80, 64, 53, 57, 47, 48, 49, 47, 47, 48],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa','#039be5','#6d4c41','#ff7043','#7e57c2','#00bcd4']
+  },
+  // --- Chart 5 ---
+  {
+    title: "Ever Purchased from International Shopping Sites",
+    labels: ["Amazon.com", "eBay.com", "Ali Express", "The Body Shop", "DHGate.com", "Etsy", "JC Penny", "Macy’s", "NewEgg", "Sears"],
+    total: [50, 22, 14, 14, 12, 12, 12, 12, 13, 12],
+    metro: [60, 31, 20, 20, 18, 17, 18, 18, 19, 18],
+    nonmetro: [36, 9, 6, 5, 3, 3, 3, 3, 3, 3],
+    age18_24: [56, 40, 33, 30, 28, 27, 27, 27, 28, 27],
+    age25_34: [93, 74, 43, 47, 37, 35, 35, 35, 37, 35],
+    age36plus: [52, 22, 14, 14, 12, 12, 12, 12, 13, 12],
+    male: [50, 22, 14, 14, 12, 12, 12, 12, 13, 12],
+    female: [52, 23, 15, 13, 12, 13, 12, 13, 13, 13],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa','#039be5','#6d4c41','#ff7043','#7e57c2','#00bcd4']
+  },
+  // --- Chart 6 ---
+  {
+    title: "Ever Used Digital Wallets",
+    labels: ["Paytm", "Airtel Money", "Mobikwik", "Freecharge", "Citrus", "Oxigen"],
+    total: [70, 48, 36, 36, 23, 21],
+    metro: [77, 50, 38, 38, 26, 23],
+    nonmetro: [59, 45, 33, 33, 18, 18],
+    age18_24: [75, 55, 41, 43, 28, 25],
+    age25_34: [80, 68, 59, 58, 36, 28],
+    age36plus: [85, 74, 52, 58, 32, 24],
+    male: [72, 49, 37, 37, 24, 22],
+    female: [66, 46, 34, 34, 21, 20],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa','#039be5']
+  },
+  // --- Chart 7 ---
+  {
+    title: "Frequency of Online Shopping",
+    labels: ["Once a week", "Once a month", "Once in 3 months", "Once in 6 months", "Once a year"],
+    total: [11, 32, 25, 18, 10],
+    metro: [14, 36, 23, 16, 8],
+    nonmetro: [7, 25, 28, 22, 13],
+    age18_24: [15, 30, 27, 18, 7],
+    age25_34: [18, 40, 22, 13, 7],
+    age36plus: [8, 28, 29, 21, 14],
+    male: [12, 33, 24, 17, 9],
+    female: [10, 30, 26, 19, 11],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa']
+  },
+  // --- Chart 8 ---
+  {
+    title: "Top Categories Purchased Online",
+    labels: ["Apparel", "Electronics", "Groceries", "Footwear", "Books", "Personal Care"],
+    total: [68, 55, 33, 31, 29, 21],
+    metro: [74, 62, 37, 36, 34, 25],
+    nonmetro: [59, 44, 27, 25, 22, 15],
+    age18_24: [71, 57, 34, 32, 31, 22],
+    age25_34: [80, 68, 36, 28, 36, 28],
+    age36plus: [85, 74, 32, 24, 17, 22],
+    male: [69, 56, 34, 32, 30, 22],
+    female: [65, 52, 31, 29, 28, 19],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa','#039be5']
+  },
+  // --- Chart 9 ---
+  {
+    title: "Preferred Device for Online Shopping",
+    labels: ["Mobile", "Desktop/Laptop", "Tablet"],
+    total: [61, 34, 5],
+    metro: [66, 29, 5],
+    nonmetro: [53, 41, 6],
+    age18_24: [67, 28, 5],
+    age25_34: [68, 27, 5],
+    age36plus: [56, 38, 6],
+    male: [62, 33, 5],
+    female: [59, 36, 5],
+    colors: ['#1976d2','#43a047','#fbc02d']
+  },
+  // --- Chart 10 ---
+  {
+    title: "Reasons for Preferring Online Shopping",
+    labels: ["Convenience", "Better Prices", "Variety", "Time Saving", "Easy Returns"],
+    total: [74, 62, 54, 43, 19],
+    metro: [77, 65, 57, 46, 22],
+    nonmetro: [69, 57, 49, 38, 15],
+    age18_24: [77, 65, 57, 46, 22],
+    age25_34: [80, 68, 59, 58, 36],
+    age36plus: [85, 74, 52, 58, 32],
+    male: [75, 63, 55, 44, 20],
+    female: [72, 60, 53, 41, 18],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa']
+  },
+  // --- Chart 11 ---
+  {
+    title: "Barriers to Online Shopping",
+    labels: ["Lack of Trust", "Product Quality Concerns", "Difficult Returns", "Payment Security", "Delivery Time"],
+    total: [39, 34, 28, 19, 13],
+    metro: [42, 37, 31, 22, 16],
+    nonmetro: [33, 29, 23, 14, 9],
+    age18_24: [42, 37, 31, 22, 16],
+    age25_34: [36, 31, 26, 17, 11],
+    age36plus: [35, 30, 25, 15, 10],
+    male: [40, 35, 29, 20, 14],
+    female: [38, 33, 27, 18, 12],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa']
+  },
+  // --- Chart 12 ---
+  {
+    title: "Awareness of Payment Security Features",
+    labels: ["OTP", "3D Secure", "CVV", "EMV Chip", "Biometric"],
+    total: [81, 74, 69, 41, 19],
+    metro: [85, 78, 73, 45, 23],
+    nonmetro: [74, 67, 62, 34, 13],
+    age18_24: [83, 76, 71, 43, 21],
+    age25_34: [86, 79, 74, 47, 25],
+    age36plus: [78, 71, 66, 39, 17],
+    male: [82, 75, 70, 42, 20],
+    female: [78, 71, 67, 39, 18],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa']
+  },
+  // --- Chart 13 ---
+  {
+    title: "Usage of Credit Card Reward Points",
+    labels: ["Always", "Sometimes", "Never"],
+    total: [22, 56, 22],
+    metro: [25, 54, 21],
+    nonmetro: [18, 59, 23],
+    age18_24: [18, 57, 25],
+    age25_34: [23, 55, 22],
+    age36plus: [24, 55, 21],
+    male: [23, 56, 21],
+    female: [21, 56, 23],
+    colors: ['#1976d2','#43a047','#e53935']
+  },
+  // --- Chart 14 ---
+  {
+    title: "Preferred Credit Card Brands",
+    labels: ["HDFC", "SBI", "ICICI", "Axis", "Citi"],
+    total: [34, 28, 22, 10, 8],
+    metro: [38, 32, 25, 12, 9],
+    nonmetro: [27, 22, 17, 8, 7],
+    age18_24: [28, 23, 17, 7, 6],
+    age25_34: [36, 30, 24, 11, 9],
+    age36plus: [39, 34, 27, 13, 10],
+    male: [35, 29, 23, 11, 8],
+    female: [32, 27, 21, 9, 7],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935','#8e24aa']
+  },
+  // --- Chart 15 ---
+  {
+    title: "Reasons for Using Credit Cards Online",
+    labels: ["Convenience", "Rewards", "EMI Options", "Security"],
+    total: [61, 44, 29, 18],
+    metro: [66, 48, 31, 20],
+    nonmetro: [53, 37, 24, 14],
+    age18_24: [58, 41, 27, 16],
+    age25_34: [63, 45, 30, 19],
+    age36plus: [67, 49, 33, 21],
+    male: [62, 44, 29, 18],
+    female: [59, 43, 28, 17],
+    colors: ['#1976d2','#43a047','#fbc02d','#e53935']
+  },
+  // --- Chart 16 ---
+  {
+    title: "Reasons for Not Using Credit Cards Online",
+    labels: ["Security Concerns", "Prefer Debit", "Don't Have Credit Card"],
+    total: [41, 36, 23],
+    metro: [44, 38, 20],
+    nonmetro: [36, 32, 28],
+    age18_24: [39, 34, 25],
+    age25_34: [43, 37, 22],
+    age36plus: [45, 39, 20],
+    male: [42, 37, 22],
+    female: [39, 35, 25],
+    colors: ['#1976d2','#43a047','#fbc02d']
+  },
+  // --- Chart 17 ---
+  {
+    title: "Likelihood to Recommend Online Shopping",
+    labels: ["Very Likely", "Somewhat Likely", "Not Likely"],
+    total: [44, 38, 18],
+    metro: [49, 37, 14],
+    nonmetro: [37, 39, 24],
+    age18_24: [47, 38, 15],
+    age25_34: [45, 39, 16],
+    age36plus: [41, 37, 22],
+    male: [45, 38, 17],
+    female: [42, 38, 20],
+    colors: ['#1976d2','#43a047','#e53935']
+  }
+];
+
+// Executive summaries for each chart
+const executiveSummaries = [
+  // Chart 1
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Credit card and debit card ownership is high, with digital wallets and cash on delivery also widely used. Bank transfers, fixed deposits, and cheques are less common.</li>
+    <li><b>Location:</b> Metro residents are much more likely to own credit cards and digital wallets, while non-metros rely more on cash on delivery.</li>
+    <li><b>Age:</b> Credit card ownership rises sharply with age; digital wallet usage is highest among the youngest adults.</li>
+    <li><b>Gender:</b> Men are more likely than women to have credit cards, digital wallets, and fixed deposits. Women are slightly more likely to use cash on delivery.</li>
+    <li><b>Implication:</b> Digital financial product adoption is strongest among older, metro, and male respondents. Non-metros and women remain more reliant on cash-based options, suggesting a need for targeted digital inclusion efforts.</li>
+  </ul>`,
+  // Chart 2
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Credit cards are the most used payment method, but cash on delivery and debit cards remain significant.</li>
+    <li><b>Location:</b> Metros favor credit cards, while non-metros have a much higher reliance on cash on delivery.</li>
+    <li><b>Age:</b> Credit card usage is highest among 25–34, while debit card and cash on delivery usage is more common among the youngest group.</li>
+    <li><b>Gender:</b> Men are more likely to use credit cards and debit cards, while women show a higher preference for cash on delivery.</li>
+    <li><b>Implication:</b> Digital payment adoption is led by metros and middle-aged adults, while cash-based habits persist in non-metros and among women.</li>
+  </ul>`,
+  // Chart 3
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Amazon.in and Flipkart.com are the most popular e-commerce sites, with a long tail of secondary platforms.</li>
+    <li><b>Location:</b> Metros have higher usage across all platforms, especially Amazon and Flipkart. Non-metros lag, particularly for newer or niche platforms.</li>
+    <li><b>Age:</b> The youngest and middle-aged groups are the most active online shoppers, especially for Amazon and Flipkart.</li>
+    <li><b>Gender:</b> Usage patterns are similar for men and women, though women slightly favor Snapdeal and Myntra.</li>
+    <li><b>Implication:</b> E-commerce penetration is highest among urban, younger, and middle-aged consumers, with room for growth in non-metros.</li>
+  </ul>`,
+  // Chart 4
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Awareness of international shopping sites is broad, led by Amazon.com and eBay.com.</li>
+    <li><b>Location:</b> Metros have much higher awareness than non-metros for every site.</li>
+    <li><b>Age:</b> Awareness is highest among the middle-aged and youngest, especially for Amazon.com and eBay.com.</li>
+    <li><b>Gender:</b> Awareness is similar by gender, with men slightly higher for Amazon.com and eBay.com, women slightly higher for The Body Shop.</li>
+    <li><b>Implication:</b> International e-commerce brands have strong mindshare in metros and among younger adults, but awareness is much lower in non-metros.</li>
+  </ul>`,
+  // Chart 5
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Actual purchase from international sites is much lower than awareness, with Amazon.com leading by a wide margin.</li>
+    <li><b>Location:</b> Metros are more likely to have purchased from these sites, with non-metros showing very low engagement.</li>
+    <li><b>Age:</b> The youngest group is most likely to have purchased from a variety of international sites.</li>
+    <li><b>Gender:</b> Women are slightly more likely to have purchased from international sites than men.</li>
+    <li><b>Implication:</b> Barriers to international e-commerce remain high, especially outside metros and among older adults.</li>
+  </ul>`,
+  // Chart 6
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Paytm is the most used digital wallet, with Airtel Money and Mobikwik also popular.</li>
+    <li><b>Location:</b> Usage is higher in metros across all wallets.</li>
+    <li><b>Age:</b> Younger adults are more likely to use digital wallets, with usage declining with age.</li>
+    <li><b>Gender:</b> Men are more likely to use digital wallets than women.</li>
+    <li><b>Implication:</b> Digital wallet adoption is strongest among young, urban, and male consumers.</li>
+  </ul>`,
+  // Chart 7
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Most online shoppers buy once a month or once in 3 months.</li>
+    <li><b>Location:</b> Metros have a higher proportion of frequent shoppers, while non-metros have more infrequent shoppers.</li>
+    <li><b>Age:</b> Younger adults are more likely to shop online frequently.</li>
+    <li><b>Gender:</b> Frequency patterns are similar for men and women, with men slightly more likely to shop weekly.</li>
+    <li><b>Implication:</b> There is an opportunity to increase shopping frequency among non-metros and older consumers.</li>
+  </ul>`,
+  // Chart 8
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Apparel and electronics are the top online shopping categories.</li>
+    <li><b>Location:</b> Metros have higher purchase rates across all categories.</li>
+    <li><b>Age:</b> Middle-aged adults are most likely to purchase across all categories.</li>
+    <li><b>Gender:</b> Men are more likely to purchase electronics and personal care; women are more likely to purchase apparel and books.</li>
+    <li><b>Implication:</b> Category preferences vary by segment, suggesting opportunities for targeted marketing.</li>
+  </ul>`,
+  // Chart 9
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Mobile is the preferred device for online shopping, followed by desktop/laptop.</li>
+    <li><b>Location:</b> Metros have a higher preference for mobile, while non-metros are more likely to use desktops/laptops.</li>
+    <li><b>Age:</b> Younger adults are more likely to use mobile devices, while older adults are more likely to use desktops/laptops.</li>
+    <li><b>Gender:</b> Device preferences are similar for men and women.</li>
+    <li><b>Implication:</b> Mobile-first strategies are essential, especially for urban and younger consumers.</li>
+  </ul>`,
+  // Chart 10
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Convenience and better prices are the main reasons for preferring online shopping.</li>
+    <li><b>Location:</b> Metros value convenience and variety more, while non-metros focus on price.</li>
+    <li><b>Age:</b> Younger adults value variety and convenience more than older adults.</li>
+    <li><b>Gender:</b> Men and women have similar motivations, with women slightly more focused on convenience.</li>
+    <li><b>Implication:</b> Messaging should be tailored by segment to emphasize the most relevant benefits.</li>
+  </ul>`,
+  // Chart 11
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Lack of trust and product quality concerns are the main barriers to online shopping.</li>
+    <li><b>Location:</b> Barriers are higher in non-metros, especially around trust and delivery.</li>
+    <li><b>Age:</b> Concerns are highest among younger adults.</li>
+    <li><b>Gender:</b> Men and women report similar barriers, with women slightly more concerned about product quality.</li>
+    <li><b>Implication:</b> Building trust and addressing product quality concerns are key to expanding the market.</li>
+  </ul>`,
+  // Chart 12
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Awareness of payment security features is high for OTP, 3D Secure, and CVV, but much lower for EMV chip and biometric.</li>
+    <li><b>Location:</b> Awareness is higher in metros.</li>
+    <li><b>Age:</b> Younger adults are more aware of advanced security features.</li>
+    <li><b>Gender:</b> Awareness is slightly higher among men.</li>
+    <li><b>Implication:</b> There is a need for education on newer payment security features, especially in non-metros and among older adults.</li>
+  </ul>`,
+  // Chart 13
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Most people use credit card reward points at least sometimes, but only a minority always do so.</li>
+    <li><b>Location:</b> Metro users are more likely to always use their points.</li>
+    <li><b>Age:</b> Usage of reward points increases with age.</li>
+    <li><b>Gender:</b> Men are slightly more likely to always use reward points.</li>
+    <li><b>Implication:</b> There is potential to increase engagement with rewards programs, especially among non-metros and younger adults.</li>
+  </ul>`,
+  // Chart 14
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> HDFC and SBI are the most preferred credit card brands.</li>
+    <li><b>Location:</b> Preference for HDFC and SBI is higher in metros.</li>
+    <li><b>Age:</b> Preference for HDFC increases with age.</li>
+    <li><b>Gender:</b> Men and women have similar brand preferences.</li>
+    <li><b>Implication:</b> Leading brands have strong loyalty, but there is room for challengers among younger and non-metro consumers.</li>
+  </ul>`,
+  // Chart 15
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Convenience is the top reason for using credit cards online, followed by rewards.</li>
+    <li><b>Location:</b> Metros value convenience and rewards more than non-metros.</li>
+    <li><b>Age:</b> Older adults are more likely to value convenience and security.</li>
+    <li><b>Gender:</b> Men and women have similar motivations.</li>
+    <li><b>Implication:</b> Highlighting convenience and rewards can drive greater credit card usage online.</li>
+  </ul>`,
+  // Chart 16
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Security concerns and a preference for debit are the main reasons for not using credit cards online.</li>
+    <li><b>Location:</b> Security concerns are higher in metros, while lack of card ownership is higher in non-metros.</li>
+    <li><b>Age:</b> Security concerns increase with age.</li>
+    <li><b>Gender:</b> Women are more likely to not have a credit card.</li>
+    <li><b>Implication:</b> Addressing security concerns and promoting credit card benefits could expand usage.</li>
+  </ul>`,
+  // Chart 17
+  `<b>Executive Summary:</b><br>
+  <ul>
+    <li><b>Overall:</b> Most respondents are likely to recommend online shopping.</li>
+    <li><b>Location:</b> Likelihood to recommend is higher in metros.</li>
+    <li><b>Age:</b> Younger adults are most likely to recommend.</li>
+    <li><b>Gender:</b> Men are slightly more likely to recommend than women.</li>
+    <li><b>Implication:</b> High advocacy suggests satisfaction, but there is room to improve perceptions among non-metros and older adults.</li>
+  </ul>`
+];
+
+const chartsDiv = document.getElementById('charts');
+chartData.forEach((chart, idx) => {
+  const chartId = `chart${idx+1}`;
+  const block = document.createElement('div');
+  block.className = 'chart-block';
+  block.innerHTML = `
+    <h2>${chart.title}</h2>
+    <canvas id="${chartId}" class="bar-canvas" width="700" height="350"></canvas>
+    <div class="summary">${executiveSummaries[idx] || ""}</div>
+  `;
+  chartsDiv.appendChild(block);
+
+  let config = {
+    type: 'bar',
+    data: {
+      labels: chart.labels,
+      datasets: [{
+        label: 'Percentage (%)',
+        data: chart.total.map(x => Math.round(x)),
+        backgroundColor: chart.colors,
+        borderRadius: 12,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'start',
+          offset: -10,
+          color: '#222',
+          backgroundColor: 'rgba(255,255,255,0.85)',
+          borderRadius: 4,
+          font: { weight: 'bold', size: 16, family: 'Segoe UI, Arial' },
+          formatter: v => v + '%',
+          padding: {top: 2, bottom: 2, left: 6, right: 6}
+        }
+      },
+      elements: { bar: { borderRadius: 12, borderSkipped: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          grid: { color: 'rgba(0,0,0,0.07)' },
+          ticks: { color: '#888', font: { size: 14 }, callback: v => v + '%' }
+        },
+        x: {
+          ticks: { color: '#444', font: { size: 15 } }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  };
+  setTimeout(() => {
+    new Chart(document.getElementById(chartId), config);
+  }, 100);
+});
+</script>
+</body>
+</html>
